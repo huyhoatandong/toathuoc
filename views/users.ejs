@@ -10,8 +10,8 @@
     <section class="panel">
       <div class="topbar">
         <div>
-          <h1>Quản lý user bác sĩ</h1>
-          <p class="muted">Admin có thể thêm bác sĩ, đặt mật khẩu, xóa user.</p>
+          <h1>Quản lý mã bác sĩ</h1>
+          <p class="muted">Admin có thể thêm mã bác sĩ 4 số, xóa user, phân quyền admin.</p>
         </div>
         <div class="topbar-actions">
           <a class="button-link secondary-link" href="/">Về trang kê toa</a>
@@ -22,11 +22,7 @@
       <h2>Thêm bác sĩ mới</h2>
       <form method="post" action="/users/create" class="user-form">
         <label>Tài khoản
-          <input name="username" placeholder="vd: bs_an" required>
-        </label>
-
-        <label>Mật khẩu
-          <input name="password" type="password" placeholder="vd: 123456" required>
+          <input name="username" placeholder="vd: 1234" inputmode="numeric" pattern="\d{4}" maxlength="4" required>
         </label>
 
         <label>Học hàm/chức danh
@@ -52,15 +48,10 @@
             <div>
               <b><%= d.title ? d.title + ' ' : '' %><%= d.full_name %></b>
               <div class="muted">
-                User: <%= d.username %>
+                Mã BS: <%= d.username %>
                 <% if (d.is_admin) { %> · Admin<% } %>
               </div>
             </div>
-
-            <form method="post" action="/users/<%= d.id %>/password" class="inline-form">
-              <input name="password" type="password" placeholder="Mật khẩu mới">
-              <button type="submit" class="small">Đổi MK</button>
-            </form>
 
             <% if (d.id !== doctor.id) { %>
               <form method="post" action="/users/<%= d.id %>/delete" onsubmit="return confirm('Xóa user này?')">

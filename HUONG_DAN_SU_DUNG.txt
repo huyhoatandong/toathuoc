@@ -1,3 +1,21 @@
+CẬP NHẬT V9: Mã bác sĩ là 4 số. Mã mặc định của BS Nguyễn Quốc Huy: 1789. Không cần mật khẩu. Chạy lại SUPABASE_SQL_SCHEMA.sql trong Supabase sau khi deploy.
+
+CẬP NHẬT V8: Đăng nhập chỉ bằng mã bác sĩ, không cần mật khẩu. Mã mặc định: huy. Chạy lại SUPABASE_SQL_SCHEMA.sql trong Supabase sau khi deploy.
+
+CẬP NHẬT V7 - SỬA LOGIN
+- Bản này không dùng bcrypt nữa.
+- Dùng SHA-256 nên không cần Render Shell.
+- Sau khi upload source lên GitHub và deploy Render, hãy chạy lại file:
+  SUPABASE_SQL_SCHEMA.sql
+  trong Supabase SQL Editor.
+
+Tài khoản mặc định:
+- user: huy
+- pass: 123456
+
+Nếu vẫn không đăng nhập được, chạy riêng file:
+RESET_PASSWORD_HUY_123456.sql
+
 TOA THUỐC TỰ TÚC - SUPABASE V2
 
 Cập nhật mới:

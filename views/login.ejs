@@ -1,32 +1,15 @@
 <!doctype html>
 <html lang="vi">
-<head>
-  <meta charset="utf-8">
-  <title>Đăng nhập - Toa thuốc tự túc</title>
-  <link rel="stylesheet" href="/style.css">
-</head>
+<head><meta charset="utf-8"><title>Đăng nhập - Toa thuốc tự túc</title><link rel="stylesheet" href="/style.css"></head>
 <body class="login-page">
-  <form class="login-card" method="post" action="/login">
-    <h1>Toa thuốc tự túc</h1>
-    <p class="muted">Đăng nhập theo bác sĩ để tự hiện tên bác sĩ trên toa.</p>
-
-    <% if (error) { %>
-      <div class="login-error"><%= error %></div>
-    <% } %>
-
-    <label>Tài khoản
-      <input name="username" autocomplete="username" required>
-    </label>
-
-    <label>Mật khẩu
-      <input name="password" type="password" autocomplete="current-password" required>
-    </label>
-
-    <button type="submit">Đăng nhập</button>
-
-    <div class="guide" style="margin-top:12px">
-      Tài khoản mặc định sau khi chạy SQL: <b>huy</b> / <b>123456</b>
-    </div>
-  </form>
-</body>
-</html>
+<form class="login-card" method="post" action="/login">
+<h1>Toa thuốc tự túc</h1>
+<p class="muted">Nhập mã bác sĩ 4 số để vào app. Tên bác sĩ sẽ tự hiện trên toa.</p>
+<% if (error) { %><div class="login-error"><%= error %></div><% } %>
+<label>Mã bác sĩ
+<input name="doctor_code" placeholder="vd: 1789" inputmode="numeric" pattern="\d{4}" maxlength="4" required autofocus>
+</label>
+<button type="submit">Đăng nhập</button>
+<div class="guide" style="margin-top:12px">Mã mặc định: <b>1789</b></div>
+</form>
+</body></html>

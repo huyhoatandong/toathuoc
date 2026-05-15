@@ -5,7 +5,6 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const { createClient } = require('@supabase/supabase-js');
 const session = require('express-session');
-const bcrypt = require('bcryptjs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -19,6 +18,7 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
 }
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -74,26 +74,18 @@ app.get('/login', (req, res) => {
   res.render('login', { error: '' });
 });
 
+
 app.post('/login', async (req, res, next) => {
   try {
-    const username = String(req.body.username || '').trim();
-    const password = String(req.body.password || '');
+    const code = String(req.body.doctor_code || req.body.username || '').trim();
+    if (!/^\d{4}$/.test(code)) {
+      return res.render('login', { error: 'Mã bác sĩ phải gồm đúng 4 số' });
+    }
 
     const { data: doctor, error } = await supabase
-      .from('doctors')
-      .select('*')
-      .eq('username', username)
-      .limit(1)
-      .single();
+      .from('doctors').select('*').eq('username', code).limit(1).single();
 
-    if (error || !doctor) {
-      return res.render('login', { error: 'Sai tài khoản hoặc mật khẩu' });
-    }
-
-    const ok = await bcrypt.compare(password, doctor.password_hash || '');
-    if (!ok) {
-      return res.render('login', { error: 'Sai tài khoản hoặc mật khẩu' });
-    }
+    if (error || !doctor) return res.render('login', { error: 'Không tìm thấy mã bác sĩ' });
 
     req.session.doctor = {
       id: doctor.id,
@@ -102,12 +94,10 @@ app.post('/login', async (req, res, next) => {
       title: doctor.title || '',
       is_admin: !!doctor.is_admin
     };
-
     res.redirect('/');
-  } catch (err) {
-    next(err);
-  }
+  } catch (err) { next(err); }
 });
+
 
 app.post('/logout', (req, res) => {
   req.session.destroy(() => res.redirect('/login'));
@@ -137,20 +127,21 @@ app.get('/users', requireLogin, requireAdmin, async (req, res, next) => {
 app.post('/users/create', requireLogin, requireAdmin, async (req, res, next) => {
   try {
     const username = String(req.body.username || '').trim();
-    const password = String(req.body.password || '');
     const full_name = String(req.body.full_name || '').trim();
+
+    if (!/^\d{4}$/.test(username)) {
+      throw new Error('Mã bác sĩ phải gồm đúng 4 số');
+    }
     const title = String(req.body.title || '').trim();
     const is_admin = req.body.is_admin === 'on';
 
-    if (!username || !password || !full_name) {
-      throw new Error('Cần nhập tài khoản, mật khẩu và tên bác sĩ');
+    if (!username || !full_name) {
+      throw new Error('Cần nhập mã bác sĩ 4 số và tên bác sĩ');
     }
-
-    const password_hash = await bcrypt.hash(password, 10);
 
     const { error } = await supabase.from('doctors').insert({
       username,
-      password_hash,
+      password_hash: '',
       full_name,
       title,
       is_admin,
@@ -164,24 +155,6 @@ app.post('/users/create', requireLogin, requireAdmin, async (req, res, next) => 
   }
 });
 
-app.post('/users/:id/password', requireLogin, requireAdmin, async (req, res, next) => {
-  try {
-    const password = String(req.body.password || '');
-    if (!password) throw new Error('Cần nhập mật khẩu mới');
-
-    const password_hash = await bcrypt.hash(password, 10);
-
-    const { error } = await supabase
-      .from('doctors')
-      .update({ password_hash, updated_at: new Date().toISOString() })
-      .eq('id', req.params.id);
-
-    if (error) throw error;
-    res.redirect('/users');
-  } catch (err) {
-    next(err);
-  }
-});
 
 app.post('/users/:id/delete', requireLogin, requireAdmin, async (req, res, next) => {
   try {
