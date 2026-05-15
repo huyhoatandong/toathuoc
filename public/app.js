@@ -84,7 +84,14 @@ async function deleteMedicine(id,name){ if(!confirm(`Xóa thuốc "${name}" kh�
 
 async function loadHistory(){
   const list=await fetch('/api/prescriptions').then(r=>r.json());
-  $('history').innerHTML=list.slice(0,50).map(x=>`<div class="history-item" onclick="loadPrescription(${x.id})"><b>${esc(x.patient_name)}</b><br>${esc(x.prescription_date||'')} - ${esc(x.diagnosis||'')}</div>`).join('') || '<div class="history-item">Chưa có toa đã lưu.</div>';
+  $('history').innerHTML=list.slice(0,50).map(x=>`
+    <div class="history-item history-row">
+      <div class="history-content" onclick="loadPrescription(${x.id})">
+        <b>${esc(x.patient_name)}</b><br>${esc(x.prescription_date||'')} - ${esc(x.diagnosis||'')}
+      </div>
+      <button type="button" class="danger small" onclick="deletePrescription(${x.id})">Xóa</button>
+    </div>
+  `).join('') || '<div class="history-item">Chưa có toa đã lưu.</div>';
 }
 async function loadPrescription(id){
   const list=await fetch('/api/prescriptions').then(r=>r.json());
@@ -94,6 +101,22 @@ async function loadPrescription(id){
   try{ const items=JSON.parse(p.items_json||'[]'); if(items.length) items.forEach(it=>makeRow(it)); else makeRow(); } catch(e){ makeRow(); }
   updatePreview(); window.scrollTo({top:0,behavior:'smooth'});
 }
+
+async function deletePrescription(id){
+  if(!confirm('Bạn có chắc muốn xóa toa này khỏi lịch sử?')) return;
+
+  const r = await fetch('/api/prescription/' + id, { method: 'DELETE' });
+  const j = await r.json();
+
+  if(j.ok){
+    $('status').textContent = 'Đã xóa toa khỏi lịch sử.';
+    await loadHistory();
+  }else{
+    $('status').textContent = j.error || 'Không xóa được toa.';
+    alert(j.error || 'Không xóa được toa.');
+  }
+}
+
 async function refreshPatients(){
   const patients=await fetch('/api/patients').then(r=>r.json());
   $('patientSelect').innerHTML='<option value="">-- Bệnh nhân mới --</option>'+patients.map(p=>`<option value='${JSON.stringify(p).replace(/'/g,"&#39;")}'>${p.name} ${p.age?'- '+p.age+' tuổi':''}</option>`).join('');

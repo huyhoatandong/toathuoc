@@ -163,6 +163,21 @@ app.post('/api/prescription', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+
+app.delete('/api/prescription/:id', async (req, res, next) => {
+  try {
+    const { error } = await supabase
+      .from('prescriptions')
+      .delete()
+      .eq('id', req.params.id);
+
+    if (error) throw error;
+    res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
 app.use((err, req, res, next) => {
   console.error(err);
   res.status(500).json({ ok: false, error: err.message || 'Lỗi server' });

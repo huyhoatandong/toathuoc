@@ -38,3 +38,14 @@ button.secondary{background:#475467} button.danger,button.remove{background:#b42
 .signature-space{height:28mm}
 @page{size:A5 portrait;margin:0}
 @media print{body{background:white}.no-print{display:none!important}.paper{box-shadow:none;margin:0;width:148mm;min-height:210mm;padding:8mm 9mm 7mm}.a5{page-break-after:always}}
+
+
+.history-row{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:8px;
+  align-items:center;
+}
+.history-content{
+  cursor:pointer;
+}
