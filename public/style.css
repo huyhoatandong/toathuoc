@@ -1,313 +1,40 @@
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  background: #e9eef3;
-  font-family: Arial, sans-serif;
-  color: #111;
-}
-
-.app-shell {
-  display: grid;
-  grid-template-columns: minmax(520px, 1.1fr) minmax(420px, .9fr);
-  gap: 14px;
-  padding: 14px;
-  align-items: start;
-}
-
-.panel {
-  background: #fff;
-  border-radius: 12px;
-  padding: 14px;
-  box-shadow: 0 8px 24px rgba(0,0,0,.08);
-}
-
-h1 {
-  margin: 0 0 6px;
-  font-size: 22px;
-}
-
-h2 {
-  font-size: 15px;
-  margin: 14px 0 8px;
-}
-
-.muted {
-  color: #666;
-  margin: 0 0 8px;
-}
-
-.grid2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 9px;
-}
-
-.grid-med-form {
-  display: grid;
-  grid-template-columns: 1.4fr .8fr .8fr .8fr 1.2fr 1.2fr;
-  gap: 7px;
-}
-
-label {
-  display: block;
-  font-weight: 600;
-  margin: 8px 0 4px;
-}
-
-input, select, textarea {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ccd2d8;
-  border-radius: 8px;
-  font: inherit;
-}
-
-button {
-  border: 0;
-  border-radius: 9px;
-  padding: 9px 12px;
-  background: #155eef;
-  color: #fff;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-button:hover {
-  filter: brightness(.95);
-}
-
-button.secondary {
-  background: #475467;
-}
-
-button.danger,
-button.remove {
-  background: #b42318;
-}
-
-button.small {
-  padding: 6px 8px;
-  font-size: 12px;
-}
-
-.actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 11px;
-  flex-wrap: wrap;
-}
-
-#status {
-  margin-top: 8px;
-  color: #0a7a2f;
-  font-weight: 700;
-}
-
-.guide {
-  font-size: 12px;
-  color: #667085;
-  margin-top: 6px;
-}
-
-.med-row {
-  border: 1px solid #dde3ea;
-  border-radius: 10px;
-  padding: 9px;
-  margin: 8px 0;
-  background: #fafcff;
-}
-
-.med-row .top {
-  display: grid;
-  grid-template-columns: 2fr 1fr 44px;
-  gap: 8px;
-}
-
-.med-row .bottom {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1.6fr;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.medicine-list,
-.history-list {
-  max-height: 315px;
-  overflow: auto;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  margin-top: 8px;
-}
-
-.medicine-item {
-  padding: 8px;
-  border-bottom: 1px solid #eee;
-  font-size: 13px;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 8px;
-}
-
-.medicine-item b {
-  font-size: 13.5px;
-}
-
-.medicine-item small {
-  color: #555;
-}
-
-.medicine-actions {
-  display: flex;
-  gap: 6px;
-  align-items: start;
-}
-
-.history-item {
-  padding: 8px;
-  border-bottom: 1px solid #eee;
-  font-size: 13px;
-}
-
-/* Khung giấy A5 xem trước */
-.paper {
-  background: #fff;
-  margin: 14px auto 24px;
-  box-shadow: 0 10px 30px rgba(0,0,0,.15);
-  font-family: "Times New Roman", Times, serif;
-}
-
-.a5 {
-  width: 148mm;
-  min-height: 210mm;
-  padding: 8mm 9mm 7mm;
-  position: relative;
-}
-
-/* Form toa */
-.rx-header {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  height: 23mm;
-  padding-top: 4mm;
-}
-
-.logo {
-  width: 16mm;
-  height: 16mm;
-  object-fit: contain;
-  flex: 0 0 16mm;
-}
-
-.hospital {
-  font-size: 10.2pt;
-  line-height: 1.28;
-  font-weight: 600;
-  padding-top: 2mm; /* dịch tên BV/PK xuống giữa logo */
-}
-
-.patient-block {
-  font-size: 10.2pt;
-  line-height: 1.42;
-  margin-top: 6mm; /* phần thông tin BN cho xuống dưới */
-}
-
-.patient-line-2 {
-  display: flex;
-  gap: 24mm;
-}
-
-.title {
-  text-align: center;
-  font-size: 15.5pt;
-  margin: 3.5mm 0 4mm;
-  font-weight: 800;
-  letter-spacing: .4px;
-}
-
-.items {
-  font-size: 9.8pt;
-  line-height: 1.26;
-  min-height: 83mm;
-}
-
-.rx-item {
-  margin-bottom: 2.3mm;
-}
-
-.rx-item-name {
-  display: flex;
-  gap: 2.5mm;
-  align-items: flex-end;
-}
-
-.rx-item-name .index {
-  width: 6mm;
-}
-
-.rx-item-name .name {
-  flex: 1;
-  border-bottom: 1px dotted #333;
-  min-height: 5mm;
-}
-
-.rx-item-name .qty {
-  width: 31mm;
-  white-space: nowrap;
-}
-
-.rx-item-use {
-  padding-left: 8mm;
-}
-
-.advice-line {
-  font-size: 8.1pt; /* dặn dò nhỏ hơn */
-  line-height: 1.16;
-  margin-top: 2.2mm;
-}
-
-.rx-footer {
-  display: grid;
-  grid-template-columns: 1fr 55mm;
-  margin-top: 9mm;
-  text-align: center;
-  font-size: 10pt;
-}
-
-.doctor-box strong {
-  font-size: 10.5pt;
-}
-
-.signature-space {
-  height: 28mm; /* khoảng trống ký rộng hơn */
-}
-
-@page {
-  size: A5 portrait;
-  margin: 0;
-}
-
-@media print {
-  body {
-    background: white;
-  }
-
-  .no-print {
-    display: none !important;
-  }
-
-  .paper {
-    box-shadow: none;
-    margin: 0;
-    width: 148mm;
-    min-height: 210mm;
-    padding: 8mm 9mm 7mm;
-  }
-
-  .a5 {
-    page-break-after: always;
-  }
-}
+*{box-sizing:border-box}
+body{margin:0;background:#e9eef3;font-family:Arial,sans-serif;color:#111}
+.app-shell{display:grid;grid-template-columns:minmax(520px,1.1fr) minmax(420px,.9fr);gap:14px;padding:14px;align-items:start}
+.panel{background:#fff;border-radius:12px;padding:14px;box-shadow:0 8px 24px rgba(0,0,0,.08)}
+h1{margin:0 0 6px;font-size:22px} h2{font-size:15px;margin:14px 0 8px}
+.muted,.guide{color:#666;font-size:12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.grid-med-form{display:grid;grid-template-columns:1.4fr .8fr .8fr .8fr 1.2fr 1.2fr;gap:7px}
+label{display:block;font-weight:600;margin:8px 0 4px}
+input,select,textarea{width:100%;padding:8px;border:1px solid #ccd2d8;border-radius:8px;font:inherit}
+button{border:0;border-radius:9px;padding:9px 12px;background:#155eef;color:#fff;font-weight:700;cursor:pointer}
+button.secondary{background:#475467} button.danger,button.remove{background:#b42318} button.small{padding:6px 8px;font-size:12px}
+.actions{display:flex;gap:8px;margin-top:11px;flex-wrap:wrap}
+#status{margin-top:8px;color:#0a7a2f;font-weight:700}
+.med-row{border:1px solid #dde3ea;border-radius:10px;padding:9px;margin:8px 0;background:#fafcff}
+.med-row .top{display:grid;grid-template-columns:2fr 1fr 44px;gap:8px}
+.med-row .bottom{display:grid;grid-template-columns:1fr 1fr 1.6fr;gap:8px;margin-top:8px}
+.medicine-list,.history-list{max-height:315px;overflow:auto;border:1px solid #e5e7eb;border-radius:10px;margin-top:8px}
+.medicine-item,.history-item{padding:8px;border-bottom:1px solid #eee;font-size:13px}
+.medicine-item{display:grid;grid-template-columns:1fr auto;gap:8px}
+.medicine-actions{display:flex;gap:6px;align-items:start}
+.history-item{cursor:pointer}
+.paper{background:#fff;margin:14px auto 24px;box-shadow:0 10px 30px rgba(0,0,0,.15);font-family:"Times New Roman",Times,serif}
+.a5{width:148mm;min-height:210mm;padding:8mm 9mm 7mm;position:relative}
+.rx-header{display:flex;align-items:center;gap:7px;height:23mm;padding-top:4mm}
+.logo{width:16mm;height:16mm;object-fit:contain;flex:0 0 16mm}
+.hospital{font-size:10.2pt;line-height:1.28;font-weight:600;padding-top:2mm}
+.patient-block{font-size:10.2pt;line-height:1.42;margin-top:6mm}
+.patient-line-2{display:flex;gap:24mm}
+.title{text-align:center;font-size:15.5pt;margin:3.5mm 0 4mm;font-weight:800;letter-spacing:.4px}
+.items{font-size:9.8pt;line-height:1.26;min-height:83mm}
+.rx-item{margin-bottom:2.3mm}
+.rx-item-name{display:flex;gap:2.5mm;align-items:flex-end}
+.rx-item-name .index{width:6mm}.rx-item-name .name{flex:1;border-bottom:1px dotted #333;min-height:5mm}.rx-item-name .qty{width:31mm;white-space:nowrap}
+.rx-item-use{padding-left:8mm}
+.advice-line{font-size:8.1pt;line-height:1.16;margin-top:2.2mm}
+.rx-footer{display:grid;grid-template-columns:1fr 55mm;margin-top:9mm;text-align:center;font-size:10pt}
+.signature-space{height:28mm}
+@page{size:A5 portrait;margin:0}
+@media print{body{background:white}.no-print{display:none!important}.paper{box-shadow:none;margin:0;width:148mm;min-height:210mm;padding:8mm 9mm 7mm}.a5{page-break-after:always}}

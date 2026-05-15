@@ -2,132 +2,107 @@
 <html lang="vi">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Toa thuốc tự túc</title>
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-  <div class="app-shell no-print">
-    <section class="panel main-panel">
-      <h1>Toa thuốc tự túc</h1>
-      <p class="muted">Lưu bệnh nhân, lưu danh mục thuốc tham khảo, chọn nhanh khi kê toa, in đúng khổ A5.</p>
+<div class="app-shell no-print">
+  <section class="panel main-panel">
+    <h1>Toa thuốc tự túc</h1>
+    <p class="muted">Bấm In / Xuất PDF A5 sẽ tự động lưu toa trước khi mở cửa sổ in.</p>
 
-      <div class="grid2">
-        <label>Chọn bệnh nhân cũ
-          <select id="patientSelect">
-            <option value="">-- Bệnh nhân mới --</option>
-            <% patients.forEach(p => { %>
-              <option value='<%- JSON.stringify(p) %>'><%= p.name %> <%= p.age ? ' - ' + p.age + ' tuổi' : '' %></option>
-            <% }) %>
-          </select>
-        </label>
-
-        <label>Ngày ký toa
-          <input id="prescription_date" type="date">
-        </label>
-      </div>
-
-      <div class="grid2">
-        <label>Họ và tên
-          <input id="patient_name" placeholder="Nguyễn Văn A">
-        </label>
-        <label>Giới tính
-          <select id="gender">
-            <option value="">-- Chọn --</option>
-            <option value="Nam">Nam</option>
-            <option value="Nữ">Nữ</option>
-          </select>
-        </label>
-        <label>Tuổi
-          <input id="age" placeholder="60">
-        </label>
-        <label>Chẩn đoán
-          <input id="diagnosis" placeholder="...">
-        </label>
-      </div>
-
-      <h2>Kê thuốc</h2>
-      <div class="guide">Gõ hoặc chọn thuốc đã lưu trong ô tên thuốc. Khi chọn thuốc, số lượng/liều/cách dùng sẽ tự điền.</div>
-      <div id="medicineRows"></div>
-
-      <div class="actions">
-        <button type="button" id="addRow">+ Thêm dòng thuốc</button>
-      </div>
-
-      <label>Dặn dò chung
-        <textarea id="advice" rows="2"></textarea>
+    <div class="grid2">
+      <label>Chọn bệnh nhân cũ
+        <select id="patientSelect">
+          <option value="">-- Bệnh nhân mới --</option>
+          <% patients.forEach(p => { %>
+            <option value='<%- JSON.stringify(p) %>'><%= p.name %> <%= p.age ? ' - ' + p.age + ' tuổi' : '' %></option>
+          <% }) %>
+        </select>
       </label>
+      <label>Ngày ký toa <input id="prescription_date" type="date"></label>
+    </div>
 
-      <div class="actions">
-        <button type="button" id="saveBtn">Lưu toa</button>
-        <button type="button" id="printBtn">In / Xuất PDF A5</button>
-        <button type="button" id="newBtn" class="secondary">Toa mới</button>
-      </div>
-      <div id="status"></div>
-    </section>
+    <div class="grid2">
+      <label>Họ và tên <input id="patient_name"></label>
+      <label>Giới tính
+        <select id="gender">
+          <option value="">-- Chọn --</option>
+          <option value="Nam">Nam</option>
+          <option value="Nữ">Nữ</option>
+        </select>
+      </label>
+      <label>Tuổi <input id="age"></label>
+      <label>Chẩn đoán <input id="diagnosis"></label>
+    </div>
 
-    <section class="panel side-panel">
-      <h2>Danh mục thuốc tham khảo</h2>
-      <div class="grid-med-form">
-        <input id="newMedName" placeholder="Tên thuốc">
-        <input id="newMedQty" placeholder="Số lượng">
-        <input id="newMedDays" placeholder="Số lần/ngày">
-        <input id="newMedDose" placeholder="Mỗi lần">
-        <input id="newMedRoute" placeholder="Cách dùng / thời điểm">
-        <input id="newMedIns" placeholder="Dặn dò riêng">
-      </div>
+    <h2>Kê thuốc</h2>
+    <div id="medicineRows"></div>
+    <div class="actions"><button id="addRow" type="button">+ Thêm dòng thuốc</button></div>
 
-      <div class="actions">
-        <button type="button" id="saveMedBtn">Lưu thuốc</button>
-        <button type="button" id="clearMedBtn" class="secondary">Xóa ô nhập</button>
-      </div>
+    <label>Dặn dò chung <textarea id="advice" rows="2"></textarea></label>
 
-      <div id="medicineList" class="medicine-list"></div>
+    <div class="actions">
+      <button id="saveBtn" type="button">Lưu toa</button>
+      <button id="printBtn" type="button">In / Xuất PDF A5</button>
+      <button id="newBtn" type="button" class="secondary">Toa mới</button>
+    </div>
+    <div id="status"></div>
+  </section>
 
-      <h2>Lịch sử toa</h2>
-      <div id="history" class="history-list"></div>
-<div class="guide">Bấm vào toa cũ để nạp lại toa thuốc.</div>
-    </section>
-  </div>
+  <section class="panel side-panel">
+    <h2>Danh mục thuốc tham khảo</h2>
+    <div class="grid-med-form">
+      <input id="newMedName" placeholder="Tên thuốc">
+      <input id="newMedQty" placeholder="Số lượng">
+      <input id="newMedDays" placeholder="Số lần/ngày">
+      <input id="newMedDose" placeholder="Mỗi lần">
+      <input id="newMedRoute" placeholder="Cách dùng / thời điểm">
+      <input id="newMedIns" placeholder="Dặn dò riêng">
+    </div>
+    <div class="actions">
+      <button id="saveMedBtn" type="button">Lưu thuốc</button>
+      <button id="clearMedBtn" type="button" class="secondary">Xóa ô nhập</button>
+    </div>
+    <div id="medicineList" class="medicine-list"></div>
 
-  <main class="paper a5" id="printArea">
-    <header class="rx-header">
-      <img src="/logo.png" class="logo" alt="Logo bệnh viện">
-      <div class="hospital">
-        <div>Bệnh viện Đa khoa Thủ Đức</div>
-        <div>Phòng khám Ung bướu</div>
-      </div>
-    </header>
+    <h2>Lịch sử toa</h2>
+    <div id="history" class="history-list"></div>
+    <div class="guide">Bấm vào toa cũ để nạp lại toa thuốc.</div>
+  </section>
+</div>
 
-    <section class="patient-block">
-      <div><b>Họ và tên: <span id="pv_name"></span></b></div>
-      <div class="patient-line-2">
-        <b>Giới tính: <span id="pv_gender"></span></b>
-        <b>Tuổi: <span id="pv_age"></span></b>
-      </div>
-      <div><b>Chẩn đoán: <span id="pv_diagnosis"></span></b></div>
-    </section>
+<main class="paper a5" id="printArea">
+  <header class="rx-header">
+    <img src="/logo.png" class="logo" alt="Logo">
+    <div class="hospital">
+      <div>Bệnh viện Đa khoa Thủ Đức</div>
+      <div>Phòng khám Ung bướu</div>
+    </div>
+  </header>
 
-    <h1 class="title">ĐƠN THUỐC</h1>
+  <section class="patient-block">
+    <div><b>Họ và tên: <span id="pv_name"></span></b></div>
+    <div class="patient-line-2"><b>Giới tính: <span id="pv_gender"></span></b><b>Tuổi: <span id="pv_age"></span></b></div>
+    <div><b>Chẩn đoán: <span id="pv_diagnosis"></span></b></div>
+  </section>
 
-    <section id="pv_items" class="items"></section>
+  <h1 class="title">ĐƠN THUỐC</h1>
+  <section id="pv_items" class="items"></section>
+  <div class="advice-line">Dặn dò: <span id="pv_advice"></span></div>
 
-    <div class="advice-line">Dặn dò: <span id="pv_advice"></span></div>
+  <footer class="rx-footer">
+    <div></div>
+    <div class="doctor-box">
+      <div id="pv_today_sign">Ngày …. Tháng ….. Năm …......</div>
+      <div><b>Bác sĩ khám bệnh</b></div>
+      <div class="signature-space"></div>
+      <strong>BS CKI. NGUYỄN QUỐC HUY</strong>
+    </div>
+  </footer>
+</main>
 
-    <footer class="rx-footer">
-      <div></div>
-      <div class="doctor-box">
-        <div id="pv_today_sign">Ngày …. Tháng ….. Năm …......</div>
-        <div><b>Bác sĩ khám bệnh</b></div>
-        <div class="signature-space"></div>
-        <strong>BS CKI. NGUYỄN QUỐC HUY</strong>
-      </div>
-    </footer>
-  </main>
-
-<script>
-window.INIT_MEDICINES = <%- JSON.stringify(medicines) %>;
-</script>
+<script>window.INIT_MEDICINES = <%- JSON.stringify(medicines) %>;</script>
 <script src="/app.js"></script>
 </body>
 </html>
