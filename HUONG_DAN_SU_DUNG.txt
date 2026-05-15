@@ -1,0 +1,75 @@
+TOA THUỐC TỰ TÚC - BẢN SUPABASE
+
+Bản này dùng:
+- Node.js + Express
+- Supabase PostgreSQL để lưu dữ liệu online
+- Không cần Render Disk
+- Dùng được với Render Free
+
+TÍNH NĂNG:
+- Lưu bệnh nhân
+- Chọn bệnh nhân cũ
+- Lưu danh mục thuốc tham khảo
+- Thêm/sửa/xóa thuốc tham khảo
+- Lưu lịch sử toa
+- Bấm toa cũ để hiện lại toa cũ
+- In/xuất PDF khổ A5
+- Giới tính chọn Nam/Nữ
+
+BƯỚC 1: TẠO DATABASE TRÊN SUPABASE
+1. Vào https://supabase.com
+2. New project
+3. Đặt tên project, ví dụ: toa-thuoc-tu-tuc
+4. Chờ Supabase tạo xong project
+
+BƯỚC 2: TẠO BẢNG
+1. Vào Supabase project
+2. Chọn SQL Editor
+3. New query
+4. Mở file SUPABASE_SQL_SCHEMA.sql
+5. Copy toàn bộ nội dung
+6. Dán vào SQL Editor
+7. Bấm Run
+
+BƯỚC 3: LẤY API KEY
+1. Vào Project Settings
+2. Chọn API
+3. Copy:
+   - Project URL
+   - service_role key
+
+LƯU Ý:
+- Dùng service_role key trong Render Environment Variables.
+- Không để service_role key lộ public trên GitHub.
+- File .env thật không nên upload lên GitHub.
+
+CHẠY TRÊN MÁY TÍNH
+1. Copy file .env.example thành .env
+2. Điền:
+   SUPABASE_URL=Project URL của bạn
+   SUPABASE_SERVICE_ROLE_KEY=service_role key của bạn
+3. Chạy:
+   npm install
+4. Chạy:
+   npm start
+5. Mở:
+   http://localhost:3000
+
+ĐƯA LÊN RENDER FREE
+1. Upload source lên GitHub
+2. Vào Render
+3. New -> Web Service
+4. Chọn repo GitHub
+5. Build Command:
+   npm install
+6. Start Command:
+   npm start
+7. Environment Variables:
+   SUPABASE_URL = Project URL của Supabase
+   SUPABASE_SERVICE_ROLE_KEY = service_role key của Supabase
+8. Không cần Add Disk
+9. Deploy
+
+QUAN TRỌNG
+- Dữ liệu nằm trong Supabase, không nằm trong Render.
+- Render Free restart cũng không mất dữ liệu.
