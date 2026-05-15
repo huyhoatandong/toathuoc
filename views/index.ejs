@@ -8,7 +8,18 @@
 <body>
 <div class="app-shell no-print">
   <section class="panel main-panel">
-    <h1>Toa thuốc tự túc</h1>
+    <div class="topbar">
+      <div>
+        <h1>Toa thuốc tự túc</h1>
+        <div class="muted">Đang đăng nhập: <b><%= doctor.title ? doctor.title + ' ' : '' %><%= doctor.full_name %></b></div>
+      </div>
+      <div class="topbar-actions">
+        <% if (doctor.is_admin) { %>
+          <a class="button-link" href="/users">Quản lý user</a>
+        <% } %>
+        <form method="post" action="/logout"><button type="submit" class="secondary">Đăng xuất</button></form>
+      </div>
+    </div>
     <p class="muted">Bấm In / Xuất PDF A5 sẽ tự động lưu toa trước khi mở cửa sổ in.</p>
 
     <div class="grid2">
@@ -97,12 +108,12 @@
       <div id="pv_today_sign">Ngày …. Tháng ….. Năm …......</div>
       <div><b>Bác sĩ khám bệnh</b></div>
       <div class="signature-space"></div>
-      <strong>BS CKI. NGUYỄN QUỐC HUY</strong>
+      <strong id="pv_doctor_name"><%= doctor.title ? doctor.title + " " : "" %><%= doctor.full_name %></strong>
     </div>
   </footer>
 </main>
 
-<script>window.INIT_MEDICINES = <%- JSON.stringify(medicines) %>;</script>
+<script>window.INIT_MEDICINES = <%- JSON.stringify(medicines) %>; window.CURRENT_DOCTOR = <%- JSON.stringify(doctor) %>;</script>
 <script src="/app.js"></script>
 </body>
 </html>

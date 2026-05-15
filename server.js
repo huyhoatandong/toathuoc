@@ -4,6 +4,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
 const { createClient } = require('@supabase/supabase-js');
+const session = require('express-session');
+const bcrypt = require('bcryptjs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -23,6 +25,25 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json({ limit: '10mb' }));
+
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'toa-thuoc-tu-tuc-secret-change-me',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { maxAge: 1000 * 60 * 60 * 12 }
+}));
+
+function requireLogin(req, res, next) {
+  if (req.session && req.session.doctor) return next();
+  if (req.path.startsWith('/api')) return res.status(401).json({ ok: false, error: 'Chưa đăng nhập' });
+  return res.redirect('/login');
+}
+
+function requireAdmin(req, res, next) {
+  if (req.session && req.session.doctor && req.session.doctor.is_admin) return next();
+  if (req.path.startsWith('/api')) return res.status(403).json({ ok: false, error: 'Chỉ admin mới được dùng chức năng này' });
+  return res.status(403).send('Chỉ admin mới được dùng chức năng này');
+}
 
 function normalizeMedicine(row) {
   return {
@@ -48,18 +69,156 @@ async function ensureSampleMedicines() {
   ]);
 }
 
-app.get('/', async (req, res, next) => {
+
+app.get('/login', (req, res) => {
+  res.render('login', { error: '' });
+});
+
+app.post('/login', async (req, res, next) => {
+  try {
+    const username = String(req.body.username || '').trim();
+    const password = String(req.body.password || '');
+
+    const { data: doctor, error } = await supabase
+      .from('doctors')
+      .select('*')
+      .eq('username', username)
+      .limit(1)
+      .single();
+
+    if (error || !doctor) {
+      return res.render('login', { error: 'Sai tài khoản hoặc mật khẩu' });
+    }
+
+    const ok = await bcrypt.compare(password, doctor.password_hash || '');
+    if (!ok) {
+      return res.render('login', { error: 'Sai tài khoản hoặc mật khẩu' });
+    }
+
+    req.session.doctor = {
+      id: doctor.id,
+      username: doctor.username,
+      full_name: doctor.full_name,
+      title: doctor.title || '',
+      is_admin: !!doctor.is_admin
+    };
+
+    res.redirect('/');
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/logout', (req, res) => {
+  req.session.destroy(() => res.redirect('/login'));
+});
+
+
+app.get('/users', requireLogin, requireAdmin, async (req, res, next) => {
+  try {
+    const { data: doctors, error } = await supabase
+      .from('doctors')
+      .select('id, username, full_name, title, is_admin, created_at, updated_at')
+      .order('id', { ascending: true });
+
+    if (error) throw error;
+
+    res.render('users', {
+      doctor: req.session.doctor,
+      doctors: doctors || [],
+      error: '',
+      success: ''
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/users/create', requireLogin, requireAdmin, async (req, res, next) => {
+  try {
+    const username = String(req.body.username || '').trim();
+    const password = String(req.body.password || '');
+    const full_name = String(req.body.full_name || '').trim();
+    const title = String(req.body.title || '').trim();
+    const is_admin = req.body.is_admin === 'on';
+
+    if (!username || !password || !full_name) {
+      throw new Error('Cần nhập tài khoản, mật khẩu và tên bác sĩ');
+    }
+
+    const password_hash = await bcrypt.hash(password, 10);
+
+    const { error } = await supabase.from('doctors').insert({
+      username,
+      password_hash,
+      full_name,
+      title,
+      is_admin,
+      updated_at: new Date().toISOString()
+    });
+
+    if (error) throw error;
+    res.redirect('/users');
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/users/:id/password', requireLogin, requireAdmin, async (req, res, next) => {
+  try {
+    const password = String(req.body.password || '');
+    if (!password) throw new Error('Cần nhập mật khẩu mới');
+
+    const password_hash = await bcrypt.hash(password, 10);
+
+    const { error } = await supabase
+      .from('doctors')
+      .update({ password_hash, updated_at: new Date().toISOString() })
+      .eq('id', req.params.id);
+
+    if (error) throw error;
+    res.redirect('/users');
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/users/:id/delete', requireLogin, requireAdmin, async (req, res, next) => {
+  try {
+    if (String(req.params.id) === String(req.session.doctor.id)) {
+      throw new Error('Không thể xóa chính tài khoản đang đăng nhập');
+    }
+
+    const { error } = await supabase
+      .from('doctors')
+      .delete()
+      .eq('id', req.params.id);
+
+    if (error) throw error;
+    res.redirect('/users');
+  } catch (err) {
+    next(err);
+  }
+});
+
+
+app.get('/api/me', requireLogin, (req, res) => {
+  res.json({ ok: true, doctor: req.session.doctor });
+});
+
+
+app.get('/', requireLogin, async (req, res, next) => {
   try {
     await ensureSampleMedicines();
     const { data: patients, error: pErr } = await supabase.from('patients').select('*').order('updated_at', { ascending: false }).limit(300);
     if (pErr) throw pErr;
     const { data: medicines, error: mErr } = await supabase.from('medicines').select('*').order('name', { ascending: true });
     if (mErr) throw mErr;
-    res.render('index', { patients: patients || [], medicines: (medicines || []).map(normalizeMedicine) });
+    res.render('index', { patients: patients || [], medicines: (medicines || []).map(normalizeMedicine), doctor: req.session.doctor });
   } catch (err) { next(err); }
 });
 
-app.get('/api/patients', async (req, res, next) => {
+app.get('/api/patients', requireLogin, async (req, res, next) => {
   try {
     const { data, error } = await supabase.from('patients').select('*').order('updated_at', { ascending: false });
     if (error) throw error;
@@ -67,7 +226,7 @@ app.get('/api/patients', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
-app.get('/api/medicines', async (req, res, next) => {
+app.get('/api/medicines', requireLogin, async (req, res, next) => {
   try {
     const { data, error } = await supabase.from('medicines').select('*').order('name', { ascending: true });
     if (error) throw error;
@@ -75,7 +234,7 @@ app.get('/api/medicines', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
-app.post('/api/medicine', async (req, res, next) => {
+app.post('/api/medicine', requireLogin, async (req, res, next) => {
   try {
     const m = req.body || {};
     const name = String(m.name || '').trim();
@@ -96,7 +255,7 @@ app.post('/api/medicine', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
-app.delete('/api/medicine/:id', async (req, res, next) => {
+app.delete('/api/medicine/:id', requireLogin, async (req, res, next) => {
   try {
     const { error } = await supabase.from('medicines').delete().eq('id', req.params.id);
     if (error) throw error;
@@ -104,7 +263,7 @@ app.delete('/api/medicine/:id', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
-app.get('/api/prescriptions', async (req, res, next) => {
+app.get('/api/prescriptions', requireLogin, async (req, res, next) => {
   try {
     const { data, error } = await supabase.from('prescriptions').select('*').order('id', { ascending: false }).limit(100);
     if (error) throw error;
@@ -112,7 +271,7 @@ app.get('/api/prescriptions', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
-app.post('/api/prescription', async (req, res, next) => {
+app.post('/api/prescription', requireLogin, async (req, res, next) => {
   try {
     const p = req.body || {};
     const patientName = String(p.patient_name || '').trim();
@@ -155,6 +314,9 @@ app.post('/api/prescription', async (req, res, next) => {
       diagnosis: p.diagnosis || '',
       advice: p.advice || '',
       prescription_date: p.prescription_date || null,
+      doctor_id: req.session.doctor.id,
+      doctor_name: req.session.doctor.full_name,
+      doctor_title: req.session.doctor.title || '',
       items
     }).select().single();
 
@@ -164,7 +326,7 @@ app.post('/api/prescription', async (req, res, next) => {
 });
 
 
-app.delete('/api/prescription/:id', async (req, res, next) => {
+app.delete('/api/prescription/:id', requireLogin, async (req, res, next) => {
   try {
     const { error } = await supabase
       .from('prescriptions')

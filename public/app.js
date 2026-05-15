@@ -62,7 +62,7 @@ function updatePreview(){
 }
 
 async function saveCurrentPrescription(showMessage=true){
-  const payload={patient_name:$('patient_name').value,gender:$('gender').value,age:$('age').value,diagnosis:$('diagnosis').value,advice:$('advice').value,prescription_date:$('prescription_date').value,items:getItems()};
+  const payload={patient_name:$('patient_name').value,gender:$('gender').value,age:$('age').value,diagnosis:$('diagnosis').value,advice:$('advice').value,prescription_date:$('prescription_date').value,items:getItems(),doctor_id:window.CURRENT_DOCTOR?.id,doctor_name:window.CURRENT_DOCTOR?.full_name,doctor_title:window.CURRENT_DOCTOR?.title};
   const r=await fetch('/api/prescription',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
   const j=await r.json();
   if(!j.ok) throw new Error(j.error || 'Lỗi lưu toa');

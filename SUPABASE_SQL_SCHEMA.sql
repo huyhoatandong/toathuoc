@@ -1,6 +1,3 @@
--- TOA THUỐC TỰ TÚC - SUPABASE SQL
--- Vào Supabase -> SQL Editor -> New query -> dán toàn bộ file này -> Run
-
 create table if not exists public.patients (
   id bigserial primary key,
   name text not null,
@@ -41,9 +38,46 @@ alter table public.patients enable row level security;
 alter table public.medicines enable row level security;
 alter table public.prescriptions enable row level security;
 
--- App dùng SERVICE_ROLE_KEY ở server nên RLS vẫn an toàn.
--- Không cần policy public nếu chỉ gọi Supabase từ server Node.js.
 
-create index if not exists idx_patients_name on public.patients(name);
-create index if not exists idx_medicines_name on public.medicines(name);
-create index if not exists idx_prescriptions_created_at on public.prescriptions(created_at desc);
+create table if not exists public.doctors (
+  id bigserial primary key,
+  username text not null unique,
+  password_hash text not null,
+  full_name text not null,
+  title text,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+alter table public.doctors enable row level security;
+
+-- Tài khoản mặc định:
+-- username: huy
+-- password: 123456
+-- Bạn nên đổi mật khẩu sau khi deploy.
+insert into public.doctors (username, password_hash, full_name, title, is_admin)
+values (
+  'huy',
+  '$2a$10$7QJ8qsP6Qz39wmudGAW2ZegVKLnIpJJlC4hOnBQulO7sSxubZ50Yq',
+  'NGUYỄN QUỐC HUY',
+  'BS CKI.',
+  true
+)
+on conflict (username) do nothing;
+
+alter table public.prescriptions
+add column if not exists doctor_id bigint references public.doctors(id) on delete set null;
+
+alter table public.prescriptions
+add column if not exists doctor_name text;
+
+alter table public.prescriptions
+add column if not exists doctor_title text;
+
+
+alter table public.doctors
+add column if not exists is_admin boolean default false;
+
+update public.doctors
+set is_admin = true
+where username = 'huy';

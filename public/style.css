@@ -49,3 +49,103 @@ button.secondary{background:#475467} button.danger,button.remove{background:#b42
 .history-content{
   cursor:pointer;
 }
+
+
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:flex-start;
+}
+.login-page{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+}
+.login-card{
+  width:100%;
+  max-width:420px;
+  background:#fff;
+  border-radius:16px;
+  padding:22px;
+  box-shadow:0 12px 40px rgba(0,0,0,.12);
+}
+.login-card button{
+  width:100%;
+  margin-top:12px;
+}
+.login-error{
+  background:#fee4e2;
+  color:#b42318;
+  border-radius:8px;
+  padding:10px;
+  margin:10px 0;
+  font-weight:700;
+}
+
+
+.topbar-actions{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.button-link{
+  display:inline-block;
+  border-radius:9px;
+  padding:9px 12px;
+  background:#155eef;
+  color:#fff;
+  font-weight:700;
+  text-decoration:none;
+}
+.secondary-link{
+  background:#475467;
+}
+.users-shell{
+  display:block;
+  max-width:1100px;
+  margin:0 auto;
+}
+.user-form{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr 1.3fr auto auto;
+  gap:8px;
+  align-items:end;
+}
+.checkbox-label{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding-bottom:8px;
+}
+.checkbox-label input{
+  width:auto;
+}
+.user-list{
+  border:1px solid #e5e7eb;
+  border-radius:10px;
+  overflow:hidden;
+}
+.user-row{
+  display:grid;
+  grid-template-columns:1.2fr 1fr auto;
+  gap:10px;
+  align-items:center;
+  padding:10px;
+  border-bottom:1px solid #eee;
+}
+.inline-form{
+  display:flex;
+  gap:6px;
+}
+.inline-form input{
+  min-width:160px;
+}
+@media(max-width:900px){
+  .user-form,.user-row{
+    grid-template-columns:1fr;
+  }
+}

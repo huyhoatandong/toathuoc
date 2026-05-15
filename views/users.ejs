@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <title>Quản lý user - Toa thuốc tự túc</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="app-shell users-shell no-print">
+    <section class="panel">
+      <div class="topbar">
+        <div>
+          <h1>Quản lý user bác sĩ</h1>
+          <p class="muted">Admin có thể thêm bác sĩ, đặt mật khẩu, xóa user.</p>
+        </div>
+        <div class="topbar-actions">
+          <a class="button-link secondary-link" href="/">Về trang kê toa</a>
+          <form method="post" action="/logout"><button type="submit" class="secondary">Đăng xuất</button></form>
+        </div>
+      </div>
+
+      <h2>Thêm bác sĩ mới</h2>
+      <form method="post" action="/users/create" class="user-form">
+        <label>Tài khoản
+          <input name="username" placeholder="vd: bs_an" required>
+        </label>
+
+        <label>Mật khẩu
+          <input name="password" type="password" placeholder="vd: 123456" required>
+        </label>
+
+        <label>Học hàm/chức danh
+          <input name="title" placeholder="vd: BS CKI.">
+        </label>
+
+        <label>Họ tên bác sĩ
+          <input name="full_name" placeholder="vd: TRẦN VĂN AN" required>
+        </label>
+
+        <label class="checkbox-label">
+          <input type="checkbox" name="is_admin">
+          Cho quyền admin
+        </label>
+
+        <button type="submit">Thêm user</button>
+      </form>
+
+      <h2>Danh sách user</h2>
+      <div class="user-list">
+        <% doctors.forEach(d => { %>
+          <div class="user-row">
+            <div>
+              <b><%= d.title ? d.title + ' ' : '' %><%= d.full_name %></b>
+              <div class="muted">
+                User: <%= d.username %>
+                <% if (d.is_admin) { %> · Admin<% } %>
+              </div>
+            </div>
+
+            <form method="post" action="/users/<%= d.id %>/password" class="inline-form">
+              <input name="password" type="password" placeholder="Mật khẩu mới">
+              <button type="submit" class="small">Đổi MK</button>
+            </form>
+
+            <% if (d.id !== doctor.id) { %>
+              <form method="post" action="/users/<%= d.id %>/delete" onsubmit="return confirm('Xóa user này?')">
+                <button type="submit" class="danger small">Xóa</button>
+              </form>
+            <% } else { %>
+              <span class="muted">Đang đăng nhập</span>
+            <% } %>
+          </div>
+        <% }) %>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

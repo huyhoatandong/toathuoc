@@ -1,6 +1,6 @@
 {
   "name": "toa-thuoc-tu-tuc-supabase",
-  "version": "2.1.0",
+  "version": "2.3.0",
   "description": "Toa thuốc tự túc - Node.js + Supabase, tự lưu khi in",
   "main": "server.js",
   "scripts": {
@@ -12,6 +12,8 @@
     "body-parser": "^1.20.2",
     "dotenv": "^16.4.7",
     "ejs": "^3.1.10",
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "bcryptjs": "^2.4.3",
+    "express-session": "^1.18.1"
   }
 }
