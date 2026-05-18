@@ -277,8 +277,44 @@ app.post('/api/prescription', requireLogin, async (req, res, next) => {
       patientId = data.id;
     }
 
-        // Không tự cập nhật Danh mục thuốc tham khảo khi sửa thuốc trong phần ghi toa.
-    // Danh mục chỉ thay đổi khi bấm nút Lưu thuốc ở khung Danh mục thuốc tham khảo.
+    // Tự động lưu thuốc mới vào Danh mục thuốc tham khảo.
+    // Nếu tên thuốc đã có trong danh mục thì bỏ qua, KHÔNG cập nhật lại thông tin cũ.
+    const seenMedicineNames = new Set();
+    const medicinePayload = items
+      .map(item => ({
+        name: String(item.name || '').trim(),
+        default_quantity: item.quantity || '',
+        default_days: item.days || '',
+        default_dose: item.dose || '',
+        default_route: item.route || '',
+        default_instruction: item.instruction || '',
+        updated_at: new Date().toISOString()
+      }))
+      .filter(item => {
+        const key = item.name.toLowerCase();
+        if (!item.name || seenMedicineNames.has(key)) return false;
+        seenMedicineNames.add(key);
+        return true;
+      });
+
+    if (medicinePayload.length) {
+      const names = medicinePayload.map(m => m.name);
+      const { data: existingMeds, error: existingMedErr } = await supabase
+        .from('medicines')
+        .select('name')
+        .in('name', names);
+      if (existingMedErr) throw existingMedErr;
+
+      const existingNames = new Set((existingMeds || []).map(m => String(m.name || '').toLowerCase()));
+      const newMedicinesOnly = medicinePayload.filter(m => !existingNames.has(m.name.toLowerCase()));
+
+      if (newMedicinesOnly.length) {
+        const { error: medErr } = await supabase
+          .from('medicines')
+          .insert(newMedicinesOnly);
+        if (medErr) throw medErr;
+      }
+    }
 
     const { data: saved, error: saveErr } = await supabase.from('prescriptions').insert({
       patient_id: patientId,

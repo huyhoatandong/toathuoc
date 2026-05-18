@@ -1,0 +1,10 @@
+BẢN CẬP NHẬT V14 - TỰ ĐỘNG LƯU THUỐC MỚI, KHÔNG GHI ĐÈ THUỐC CŨ
+
+Chức năng:
+- Khi bấm Lưu toa hoặc In / Xuất PDF A5, app tự kiểm tra các thuốc trong phần Kê thuốc.
+- Thuốc nào chưa có trong Danh mục thuốc tham khảo thì được thêm mới.
+- Thuốc nào đã có trong Danh mục thuốc tham khảo thì bỏ qua, không cập nhật lại số lượng/cách dùng/dặn dò cũ.
+
+Ghi chú:
+- Nếu muốn sửa thông tin mặc định của thuốc đã có, dùng phần Danh mục thuốc tham khảo và bấm Sửa/Lưu như trước.
+- Tên thuốc được so khớp theo tên trong danh mục.

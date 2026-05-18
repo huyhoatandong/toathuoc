@@ -67,7 +67,7 @@ async function saveCurrentPrescription(showMessage=true){
   const r=await fetch('/api/prescription',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
   const j=await r.json();
   if(!j.ok) throw new Error(j.error || 'Lỗi lưu toa');
-  if(showMessage) $('status').textContent='Đã lưu toa, bệnh nhân và thuốc mới.';
+  if(showMessage) $('status').textContent='Đã lưu toa. Thuốc mới được thêm vào danh mục; thuốc đã có được giữ nguyên.';
   await loadHistory(); await loadMedicines(); await refreshPatients();
   return j;
 }
