@@ -262,6 +262,7 @@ app.post('/api/prescription', requireLogin, async (req, res, next) => {
       gender: p.gender || '',
       age: p.age || '',
       diagnosis: p.diagnosis || '',
+      department: p.department || 'Phòng khám Ung Bướu',
       note: p.advice || '',
       updated_at: new Date().toISOString()
     };
@@ -285,6 +286,7 @@ app.post('/api/prescription', requireLogin, async (req, res, next) => {
       gender: p.gender || '',
       age: p.age || '',
       diagnosis: p.diagnosis || '',
+      department: p.department || 'Phòng khám Ung Bướu',
       advice: p.advice || '',
       prescription_date: p.prescription_date || null,
       doctor_id: req.session.doctor.id,

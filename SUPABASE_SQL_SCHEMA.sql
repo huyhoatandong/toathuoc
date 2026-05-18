@@ -8,6 +8,7 @@ create table if not exists public.patients (
   gender text,
   age text,
   diagnosis text,
+  department text default 'Phòng khám Ung Bướu',
   note text,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
@@ -38,6 +39,7 @@ create table if not exists public.doctors (
 
 alter table public.doctors add column if not exists password_hash text default '';
 alter table public.doctors add column if not exists is_admin boolean default false;
+alter table public.patients add column if not exists department text default 'Phòng khám Ung Bướu';
 
 create table if not exists public.prescriptions (
   id bigserial primary key,
@@ -46,6 +48,7 @@ create table if not exists public.prescriptions (
   gender text,
   age text,
   diagnosis text,
+  department text default 'Phòng khám Ung Bướu',
   advice text,
   prescription_date date,
   items jsonb not null default '[]'::jsonb,
@@ -58,6 +61,7 @@ create table if not exists public.prescriptions (
 alter table public.prescriptions add column if not exists doctor_id bigint references public.doctors(id) on delete set null;
 alter table public.prescriptions add column if not exists doctor_name text;
 alter table public.prescriptions add column if not exists doctor_title text;
+alter table public.prescriptions add column if not exists department text default 'Phòng khám Ung Bướu';
 
 alter table public.patients enable row level security;
 alter table public.medicines enable row level security;

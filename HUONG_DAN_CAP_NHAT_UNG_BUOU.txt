@@ -1,1 +1,5 @@
-Da them dropdown chon Phong kham Ung Buou / Khoa Ung Buou trong form toa thuoc.
+Bản v12 sửa lỗi:
+- Chọn Phòng khám Ung Bướu / Khoa Ung Bướu sẽ hiện trên đầu toa thuốc.
+- Sửa lỗi hiện 2 logo trên toa: chỉ còn 1 logo.
+
+Sau khi deploy, vào Supabase SQL Editor chạy lại file SUPABASE_SQL_SCHEMA.sql để thêm cột department nếu chưa có.
