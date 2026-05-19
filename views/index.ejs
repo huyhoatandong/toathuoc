@@ -34,6 +34,17 @@
       <label>Ngày ký toa <input id="prescription_date" type="date"></label>
     </div>
 
+    <div class="oracle-lookup">
+      <label>MSBN / Mã bệnh nhân HIS
+        <div class="lookup-row">
+          <input id="msbn" placeholder="Ví dụ: 09020171">
+          <button id="lookupMsbnBtn" type="button">Lấy từ HIS</button>
+          <button id="testOracleBtn" type="button" class="secondary">Test Oracle</button>
+        </div>
+      </label>
+      <div class="guide">Nhập MSBN rồi bấm Lấy từ HIS để tự điền họ tên, tuổi, giới tính, địa chỉ từ Oracle.</div>
+    </div>
+
     <div class="grid2">
       <label>Họ và tên <input id="patient_name"></label>
       <label>Giới tính
@@ -44,6 +55,7 @@
         </select>
       </label>
       <label>Tuổi <input id="age"></label>
+      <label>Địa chỉ <input id="address"></label>
       <label>Chẩn đoán <input id="diagnosis"></label>
       <label>Khoa / Phòng
         <select id="department">
@@ -102,8 +114,10 @@
   </header>
 
   <section class="patient-block">
+    <div><b>MSBN: <span id="pv_msbn"></span></b></div>
     <div><b>Họ và tên: <span id="pv_name"></span></b></div>
     <div class="patient-line-2"><b>Giới tính: <span id="pv_gender"></span></b><b>Tuổi: <span id="pv_age"></span></b></div>
+    <div><b>Địa chỉ: <span id="pv_address"></span></b></div>
     <div><b>Chẩn đoán: <span id="pv_diagnosis"></span></b></div>
   </section>
 

@@ -1,12 +1,15 @@
--- TOA THUỐC TỰ TÚC - SUPABASE SQL V8
+-- TOA THUỐC TỰ TÚC - SUPABASE SQL V9
+-- Bản có nhập MSBN lấy bệnh nhân trực tiếp từ Oracle HIS
 -- Login chỉ bằng mã bác sĩ 4 số, không cần mật khẩu.
 -- Mã mặc định: 1789
 
 create table if not exists public.patients (
   id bigserial primary key,
+  msbn text,
   name text not null,
   gender text,
   age text,
+  address text,
   diagnosis text,
   department text default 'Phòng khám Ung Bướu',
   note text,
@@ -39,14 +42,18 @@ create table if not exists public.doctors (
 
 alter table public.doctors add column if not exists password_hash text default '';
 alter table public.doctors add column if not exists is_admin boolean default false;
+alter table public.patients add column if not exists msbn text;
+alter table public.patients add column if not exists address text;
 alter table public.patients add column if not exists department text default 'Phòng khám Ung Bướu';
 
 create table if not exists public.prescriptions (
   id bigserial primary key,
   patient_id bigint references public.patients(id) on delete set null,
+  msbn text,
   patient_name text not null,
   gender text,
   age text,
+  address text,
   diagnosis text,
   department text default 'Phòng khám Ung Bướu',
   advice text,
@@ -58,6 +65,8 @@ create table if not exists public.prescriptions (
   created_at timestamptz default now()
 );
 
+alter table public.prescriptions add column if not exists msbn text;
+alter table public.prescriptions add column if not exists address text;
 alter table public.prescriptions add column if not exists doctor_id bigint references public.doctors(id) on delete set null;
 alter table public.prescriptions add column if not exists doctor_name text;
 alter table public.prescriptions add column if not exists doctor_title text;
@@ -69,8 +78,10 @@ alter table public.doctors enable row level security;
 alter table public.prescriptions enable row level security;
 
 create index if not exists idx_patients_name on public.patients(name);
+create index if not exists idx_patients_msbn on public.patients(msbn);
 create index if not exists idx_medicines_name on public.medicines(name);
 create index if not exists idx_prescriptions_created_at on public.prescriptions(created_at desc);
+create index if not exists idx_prescriptions_msbn on public.prescriptions(msbn);
 create index if not exists idx_doctors_username on public.doctors(username);
 
 insert into public.doctors (username, password_hash, full_name, title, is_admin)

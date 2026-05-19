@@ -164,3 +164,20 @@ button.secondary{background:#475467} button.danger,button.remove{background:#b42
   height:68px;
   object-fit:contain;
 }
+
+.oracle-lookup{
+  border:1px solid #dde3ea;
+  border-radius:10px;
+  padding:9px;
+  margin:10px 0;
+  background:#f8fbff;
+}
+.lookup-row{
+  display:grid;
+  grid-template-columns:1fr auto auto;
+  gap:8px;
+  align-items:center;
+}
+@media(max-width:700px){
+  .lookup-row{grid-template-columns:1fr;}
+}

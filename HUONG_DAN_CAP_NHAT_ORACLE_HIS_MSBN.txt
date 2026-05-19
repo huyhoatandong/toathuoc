@@ -1,0 +1,54 @@
+BẢN V15 - LẤY BỆNH NHÂN TRỰC TIẾP TỪ ORACLE HIS
+
+Đã thêm chức năng:
+- Nhập MSBN/MABN trên app toa thuốc.
+- Bấm "Lấy từ HIS".
+- App gọi Oracle HIS bảng MQSOFTTHUDUC.BTDBN.
+- Tự điền: họ tên, tuổi, giới tính, địa chỉ.
+- Lưu toa sẽ lưu kèm MSBN và địa chỉ vào Supabase.
+
+1) CHẠY SQL SUPABASE
+Vào Supabase SQL Editor, chạy lại file:
+SUPABASE_SQL_SCHEMA.sql
+
+File này thêm các cột:
+- patients.msbn
+- patients.address
+- prescriptions.msbn
+- prescriptions.address
+
+2) CẤU HÌNH BIẾN MÔI TRƯỜNG
+Trong Render > Service > Environment, thêm:
+
+ORACLE_USER=...
+ORACLE_PASSWORD=...
+ORACLE_CONNECTION=10.0.3.252:1521/mqsoft
+ORACLE_PATIENT_TABLE=MQSOFTTHUDUC.BTDBN
+
+Lưu ý bảo mật:
+- Không đưa mật khẩu Oracle lên GitHub.
+- Chỉ nhập mật khẩu trong Render Environment hoặc file .env local.
+
+3) CÀI DEPENDENCY
+Bản này có thêm package:
+oracledb
+
+Khi deploy Render, Render sẽ tự npm install theo package.json.
+Khi chạy local:
+npm install
+npm start
+
+4) TEST TRÊN APP
+Sau khi đăng nhập app:
+- Bấm "Test Oracle" để kiểm tra kết nối.
+- Nhập MSBN, ví dụ 09020171.
+- Bấm "Lấy từ HIS".
+
+5) LƯU Ý RENDER VÀ IP NỘI BỘ
+Server Oracle 10.0.3.252 là IP nội bộ.
+Nếu app chạy trên Render mà báo timeout/không kết nối được Oracle, nguyên nhân thường là Render không vào được mạng nội bộ bệnh viện.
+Khi đó có 2 cách hợp lệ:
+- Chạy app Node.js trên máy/server trong cùng mạng HIS.
+- Hoặc cấu hình VPN/tunnel hợp lệ để Render truy cập được Oracle nội bộ.
+
+Nếu app chạy local trên máy HIS thì thường kết nối được ngay.

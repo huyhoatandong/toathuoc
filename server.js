@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const { createClient } = require('@supabase/supabase-js');
 const session = require('express-session');
+const oracledb = require('oracledb');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -18,6 +19,50 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
 }
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+
+const ORACLE_USER = process.env.ORACLE_USER;
+const ORACLE_PASSWORD = process.env.ORACLE_PASSWORD;
+const ORACLE_CONNECTION = process.env.ORACLE_CONNECTION || process.env.ORACLE_CONNECT_STRING;
+const ORACLE_PATIENT_TABLE = process.env.ORACLE_PATIENT_TABLE || 'MQSOFTTHUDUC.BTDBN';
+
+function oracleConfigured() {
+  return !!(ORACLE_USER && ORACLE_PASSWORD && ORACLE_CONNECTION);
+}
+
+async function getOracleConnection() {
+  if (!oracleConfigured()) {
+    const err = new Error('Chưa cấu hình ORACLE_USER / ORACLE_PASSWORD / ORACLE_CONNECTION trong biến môi trường.');
+    err.statusCode = 400;
+    throw err;
+  }
+  return oracledb.getConnection({
+    user: ORACLE_USER,
+    password: ORACLE_PASSWORD,
+    connectionString: ORACLE_CONNECTION
+  });
+}
+
+function cleanText(value) {
+  return value == null ? '' : String(value).trim();
+}
+
+function genderFromPhai(value) {
+  const v = cleanText(value);
+  if (v === '1' || v === '01') return 'Nữ';
+  if (v === '0' || v === '00' || v === '2' || v === '02') return 'Nam';
+  return '';
+}
+
+function ageFromYear(year) {
+  const y = parseInt(cleanText(year), 10);
+  if (!y || y < 1900) return '';
+  return String(new Date().getFullYear() - y);
+}
+
+function buildAddress(row) {
+  return [row.SONHA, row.THON, row.CHOLAM].map(cleanText).filter(Boolean).join(', ');
+}
 
 
 app.set('view engine', 'ejs');
@@ -179,6 +224,73 @@ app.get('/api/me', requireLogin, (req, res) => {
   res.json({ ok: true, doctor: req.session.doctor });
 });
 
+app.get('/api/oracle/test', requireLogin, async (req, res, next) => {
+  let conn;
+  try {
+    conn = await getOracleConnection();
+    const result = await conn.execute('SELECT 1 AS OK FROM DUAL', [], { outFormat: oracledb.OUT_FORMAT_OBJECT });
+    res.json({ ok: true, data: result.rows && result.rows[0] ? result.rows[0] : null });
+  } catch (err) {
+    next(err);
+  } finally {
+    if (conn) {
+      try { await conn.close(); } catch (e) { console.error(e); }
+    }
+  }
+});
+
+app.get('/api/oracle-patient/:mabn', requireLogin, async (req, res, next) => {
+  let conn;
+  try {
+    const mabn = cleanText(req.params.mabn);
+    if (!mabn) return res.status(400).json({ ok: false, error: 'Thiếu MSBN/MABN' });
+
+    conn = await getOracleConnection();
+    const sql = `
+      SELECT
+        MABN,
+        HOTEN,
+        NAMSINH,
+        PHAI,
+        SONHA,
+        THON,
+        CHOLAM,
+        MATT,
+        MAQU,
+        MAPHUONGXA,
+        HOTENKDAU,
+        NAM
+      FROM ${ORACLE_PATIENT_TABLE}
+      WHERE MABN = :mabn
+    `;
+
+    const result = await conn.execute(sql, { mabn }, { outFormat: oracledb.OUT_FORMAT_OBJECT });
+    const row = result.rows && result.rows[0];
+    if (!row) return res.json({ ok: false, error: 'Không tìm thấy bệnh nhân trên Oracle HIS' });
+
+    const patient = {
+      mabn: cleanText(row.MABN),
+      name: cleanText(row.HOTEN),
+      gender: genderFromPhai(row.PHAI),
+      birth_year: cleanText(row.NAMSINH),
+      age: ageFromYear(row.NAMSINH),
+      address: buildAddress(row),
+      province_code: cleanText(row.MATT),
+      district_code: cleanText(row.MAQU),
+      ward_code: cleanText(row.MAPHUONGXA),
+      raw: row
+    };
+
+    res.json({ ok: true, patient });
+  } catch (err) {
+    next(err);
+  } finally {
+    if (conn) {
+      try { await conn.close(); } catch (e) { console.error(e); }
+    }
+  }
+});
+
 
 app.get('/', requireLogin, async (req, res, next) => {
   try {
@@ -258,9 +370,11 @@ app.post('/api/prescription', requireLogin, async (req, res, next) => {
     if (findErr) throw findErr;
 
     const patientPayload = {
+      msbn: p.msbn || '',
       name: patientName,
       gender: p.gender || '',
       age: p.age || '',
+      address: p.address || '',
       diagnosis: p.diagnosis || '',
       department: p.department || 'Phòng khám Ung Bướu',
       note: p.advice || '',
@@ -318,9 +432,11 @@ app.post('/api/prescription', requireLogin, async (req, res, next) => {
 
     const { data: saved, error: saveErr } = await supabase.from('prescriptions').insert({
       patient_id: patientId,
+      msbn: p.msbn || '',
       patient_name: patientName,
       gender: p.gender || '',
       age: p.age || '',
+      address: p.address || '',
       diagnosis: p.diagnosis || '',
       department: p.department || 'Phòng khám Ung Bướu',
       advice: p.advice || '',
@@ -353,7 +469,7 @@ app.delete('/api/prescription/:id', requireLogin, async (req, res, next) => {
 
 app.use((err, req, res, next) => {
   console.error(err);
-  res.status(500).json({ ok: false, error: err.message || 'Lỗi server' });
+  res.status(err.statusCode || 500).json({ ok: false, error: err.message || 'Lỗi server' });
 });
 
 app.listen(PORT, () => console.log(`Toa thuốc tự túc đang chạy: http://localhost:${PORT}`));

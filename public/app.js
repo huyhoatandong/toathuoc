@@ -46,9 +46,11 @@ function refreshDatalists(){ document.querySelectorAll('.med-row datalist').forE
 function getItems(){ return [...document.querySelectorAll('.med-row')].map(r=>({name:r.querySelector('.m-name').value.trim(),quantity:r.querySelector('.m-qty').value.trim(),days:r.querySelector('.m-days').value.trim(),dose:r.querySelector('.m-dose').value.trim(),route:r.querySelector('.m-route').value.trim(),instruction:r.querySelector('.m-ins').value.trim()})).filter(x=>x.name); }
 
 function updatePreview(){
+  if($('pv_msbn')) $('pv_msbn').textContent=$('msbn') ? $('msbn').value : '';
   $('pv_name').textContent=$('patient_name').value;
   $('pv_gender').textContent=$('gender').value;
   $('pv_age').textContent=$('age').value;
+  if($('pv_address')) $('pv_address').textContent=$('address') ? $('address').value : '';
   $('pv_diagnosis').textContent=$('diagnosis').value;
   if($('pv_department')) $('pv_department').textContent=$('department').value || 'Phòng khám Ung Bướu';
   $('pv_advice').textContent=$('advice').value;
@@ -63,7 +65,7 @@ function updatePreview(){
 }
 
 async function saveCurrentPrescription(showMessage=true){
-  const payload={patient_name:$('patient_name').value,gender:$('gender').value,age:$('age').value,diagnosis:$('diagnosis').value,department:$('department').value,advice:$('advice').value,prescription_date:$('prescription_date').value,items:getItems(),doctor_id:window.CURRENT_DOCTOR?.id,doctor_name:window.CURRENT_DOCTOR?.full_name,doctor_title:window.CURRENT_DOCTOR?.title};
+  const payload={msbn:$('msbn')?$('msbn').value:'',patient_name:$('patient_name').value,gender:$('gender').value,age:$('age').value,address:$('address')?$('address').value:'',diagnosis:$('diagnosis').value,department:$('department').value,advice:$('advice').value,prescription_date:$('prescription_date').value,items:getItems(),doctor_id:window.CURRENT_DOCTOR?.id,doctor_name:window.CURRENT_DOCTOR?.full_name,doctor_title:window.CURRENT_DOCTOR?.title};
   const r=await fetch('/api/prescription',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
   const j=await r.json();
   if(!j.ok) throw new Error(j.error || 'Lỗi lưu toa');
@@ -97,7 +99,7 @@ async function loadHistory(){
 async function loadPrescription(id){
   const list=await fetch('/api/prescriptions').then(r=>r.json());
   const p=list.find(x=>x.id==id); if(!p) return;
-  $('patient_name').value=p.patient_name||''; $('gender').value=p.gender||''; $('age').value=p.age||''; $('diagnosis').value=p.diagnosis||''; $('department').value=p.department||'Phòng khám Ung Bướu'; $('advice').value=p.advice||DEFAULT_ADVICE; $('prescription_date').value=p.prescription_date||todayISO();
+  if($('msbn')) $('msbn').value=p.msbn||p.mabn||''; $('patient_name').value=p.patient_name||''; $('gender').value=p.gender||''; $('age').value=p.age||''; if($('address')) $('address').value=p.address||''; $('diagnosis').value=p.diagnosis||''; $('department').value=p.department||'Phòng khám Ung Bướu'; $('advice').value=p.advice||DEFAULT_ADVICE; $('prescription_date').value=p.prescription_date||todayISO();
   $('medicineRows').innerHTML='';
   try{ const items=JSON.parse(p.items_json||'[]'); if(items.length) items.forEach(it=>makeRow(it)); else makeRow(); } catch(e){ makeRow(); }
   updatePreview(); window.scrollTo({top:0,behavior:'smooth'});
@@ -120,16 +122,53 @@ async function deletePrescription(id){
 
 async function refreshPatients(){
   const patients=await fetch('/api/patients').then(r=>r.json());
-  $('patientSelect').innerHTML='<option value="">-- Bệnh nhân mới --</option>'+patients.map(p=>`<option value='${JSON.stringify(p).replace(/'/g,"&#39;")}'>${p.name} ${p.age?'- '+p.age+' tuổi':''}</option>`).join('');
+  $('patientSelect').innerHTML='<option value="">-- Bệnh nhân mới --</option>'+patients.map(p=>`<option value='${JSON.stringify(p).replace(/'/g,"&#39;")}'>${p.msbn?esc(p.msbn)+' - ':''}${esc(p.name||'')} ${p.age?'- '+esc(p.age)+' tuổi':''}</option>`).join('');
 }
 
-['patient_name','gender','age','diagnosis','department','advice','prescription_date'].forEach(id=>$(id).addEventListener('input',updatePreview));
+async function testOracleConnection(){
+  try{
+    $('status').textContent='Đang test Oracle...';
+    const r=await fetch('/api/oracle/test');
+    const j=await r.json();
+    if(!j.ok) throw new Error(j.error || 'Test Oracle thất bại');
+    $('status').textContent='Oracle OK.';
+  }catch(err){
+    $('status').textContent=err.message || 'Không test được Oracle';
+    alert(err.message || 'Không test được Oracle');
+  }
+}
+
+async function lookupPatientByMsbn(){
+  const mabn = $('msbn').value.trim();
+  if(!mabn){ alert('Nhập MSBN/MABN trước.'); $('msbn').focus(); return; }
+
+  try{
+    $('status').textContent='Đang lấy bệnh nhân từ HIS Oracle...';
+    const r=await fetch('/api/oracle-patient/' + encodeURIComponent(mabn));
+    const j=await r.json();
+    if(!j.ok) throw new Error(j.error || 'Không tìm thấy bệnh nhân');
+
+    const p=j.patient || {};
+    $('msbn').value=p.mabn || mabn;
+    $('patient_name').value=p.name || '';
+    if(p.gender) $('gender').value=p.gender;
+    $('age').value=p.age || '';
+    if($('address')) $('address').value=p.address || '';
+    updatePreview();
+    $('status').textContent='Đã lấy thông tin bệnh nhân từ HIS Oracle.';
+  }catch(err){
+    $('status').textContent=err.message || 'Lỗi lấy bệnh nhân từ HIS Oracle';
+    alert(err.message || 'Lỗi lấy bệnh nhân từ HIS Oracle');
+  }
+}
+
+['msbn','patient_name','gender','age','address','diagnosis','department','advice','prescription_date'].forEach(id=>$(id).addEventListener('input',updatePreview));
 $('prescription_date').value=todayISO(); $('advice').value=DEFAULT_ADVICE;
 $('addRow').onclick=()=>makeRow();
 
 $('newBtn').onclick=()=>{ document.querySelectorAll('.main-panel input,.main-panel textarea,.main-panel select').forEach(el=>{ if(el.id!=='prescription_date' && el.id!=='department') el.value=''; }); $('medicineRows').innerHTML=''; $('prescription_date').value=todayISO(); $('department').value='Phòng khám Ung Bướu'; $('advice').value=DEFAULT_ADVICE; makeRow(); updatePreview(); };
 
-$('patientSelect').onchange=e=>{ if(!e.target.value) return; const p=JSON.parse(e.target.value); $('patient_name').value=p.name||''; $('gender').value=p.gender||''; $('age').value=p.age||''; $('diagnosis').value=p.diagnosis||''; $('department').value=p.department||'Phòng khám Ung Bướu'; $('advice').value=p.note||DEFAULT_ADVICE; updatePreview(); };
+$('patientSelect').onchange=e=>{ if(!e.target.value) return; const p=JSON.parse(e.target.value); if($('msbn')) $('msbn').value=p.msbn||p.mabn||''; $('patient_name').value=p.name||''; $('gender').value=p.gender||''; $('age').value=p.age||''; if($('address')) $('address').value=p.address||''; $('diagnosis').value=p.diagnosis||''; $('department').value=p.department||'Phòng khám Ung Bướu'; $('advice').value=p.note||DEFAULT_ADVICE; updatePreview(); };
 
 $('saveBtn').onclick=async()=>{ try{ await saveCurrentPrescription(true); } catch(err){ $('status').textContent=err.message||'Lỗi lưu toa'; } };
 
@@ -153,5 +192,8 @@ $('saveMedBtn').onclick=async()=>{
   if(j.ok){ clearMedForm(); await loadMedicines(); }
 };
 $('clearMedBtn').onclick=clearMedForm;
+if($('lookupMsbnBtn')) $('lookupMsbnBtn').onclick=lookupPatientByMsbn;
+if($('testOracleBtn')) $('testOracleBtn').onclick=testOracleConnection;
+if($('msbn')) $('msbn').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); lookupPatientByMsbn(); } });
 
 makeRow(); updatePreview(); renderMedicineList(); loadHistory(); refreshPatients();
